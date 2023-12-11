@@ -13,8 +13,11 @@ import time
 
 
 # Create SQS client
-sqs = boto3.client('sqs', endpoint_url='http://sqs.eu-west-1.localhost.localstack.cloud:4566')
-queue_url = 'http://sqs.eu-west-1.localhost.localstack.cloud:4566/000000000000/image_tasks'
+SQS_ENDPOINT = os.getenv('SQS_ENDPOINT', 'http://sqs.eu-west-1.localhost.localstack.cloud:4566')
+IMAGE_QUEUE_URL = os.getenv('SQS_IMAGE_TASK_QUEUE_URL', 'http://sqs.eu-west-1.localhost.localstack.cloud:4566/000000000000/image-tasks')
+
+sqs = boto3.client('sqs', endpoint_url=SQS_ENDPOINT)
+
 
 s3_client = boto3.client('s3', endpoint_url='http://s3.localhost.localstack.cloud:4566')
 bucket_name = 'image-generations'
@@ -99,7 +102,7 @@ def process_message(message, base, refiner):
 def listen_for_messages(base, refiner):
     while True:
         response = sqs.receive_message(
-            QueueUrl=queue_url,
+            QueueUrl=IMAGE_QUEUE_URL,
             AttributeNames=['All'],
             MaxNumberOfMessages=1,
             MessageAttributeNames=['All'],
@@ -115,7 +118,7 @@ def listen_for_messages(base, refiner):
             
             # Delete the received message from the queue
             sqs.delete_message(
-                QueueUrl=queue_url,
+                QueueUrl=IMAGE_QUEUE_URL,
                 ReceiptHandle=receipt_handle
             )
 
