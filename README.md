@@ -1,4 +1,4 @@
-# tunain-page-worker
+# tunain-image-worker
 
 ## Application Description
 
